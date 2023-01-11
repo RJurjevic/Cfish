@@ -93,11 +93,11 @@ Control allocation of the hash table as Large Pages (LP). On Windows this option
 #### NUMA
 This option only appears on NUMA machines, i.e. machines with two or more CPUs. If this option is set to "on" or "all", Cfish will spread its search threads over all nodes. If the option is set to "off", Cfish will ignore the NUMA architecture of the machine. On Linux, a subset of nodes may be specified on which to run the search threads (e.g. "0-1" or "0,1" to limit the search threads to nodes 0 and 1 out of nodes 0-3).
 
-#### Vafra Cfish
-Robert Jurjevic maintains this Cfish clone (starting from Cfish 12). Robert has a long experience in maintaining Crafty (Prof Robert Hyatt) clone called Vafra (Robert's Crafty clone). Robert switched to Vafra Cfish clone which uses (as well as some later Vafra Crafty clones) the same NNUE architecture as Cfish 12, i.e., flipped (not rotated) HalfKP 256x2-32-32-1.
-
 ## How to set up MSYS2
 1. Download and install MSYS2 from the [MSYS2](https://www.msys2.org/) website.
 2. Open an MSYS2 MinGW 64-bit terminal (e.g. via the Windows Start menu).
 3. Install the MinGW 64-bit toolchain by entering `pacman -S mingw-w64-x86_64-toolchain`.
 4. Close the MSYS2 MinGW 64-bit terminal and open another.
+
+## Vafra Cfish
+Robert Jurjevic maintains this Cfish clone (starting from Cfish 12). Robert has a long experience in maintaining Crafty (Prof Robert Hyatt) clone called Vafra (Robert's Crafty clone). Robert switched to Vafra Cfish clone which uses (as well as some later Vafra Crafty clones) the same NNUE architecture as Cfish 12, i.e., flipped (not rotated) HalfKP 256x2-32-32-1.
