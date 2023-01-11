@@ -73,7 +73,7 @@ uint32_t PieceToIndex[2][16] = {
 };
 
 // Version of the evaluation file
-static const uint32_t NnueVersion = 0x7AF32F16u;
+static const uint32_t NnueVersion = 0X7AF32F17u;
 
 // Constants used in evaluation value calculation
 enum {
@@ -225,7 +225,7 @@ typedef struct {
 
 INLINE Square orient(Color c, Square s)
 {
-  return s ^ (c == WHITE ? 0x00 : 0x3f);
+  return s ^ (c == WHITE ? 0x00 : 0x38);
 }
 
 INLINE unsigned make_index(Color c, Square s, Piece pc, Square ksq)
@@ -662,7 +662,8 @@ void nnue_init(void)
          , evalFile
 #else
          "info string ERROR: The default net can be downloaded from:\n"
-         "info string ERROR: https://tests.stockfishchess.org/api/nn/%s\n",
+         "info string ERROR: https://tests.stockfishchess.org/api/nn/%s\n"
+         "info string ERROR: The network must be of flipped HalfKP 256x2-32-32-1 architecture.",
          evalFile, option_default_string_value(OPT_EVAL_FILE)
 #endif
          );

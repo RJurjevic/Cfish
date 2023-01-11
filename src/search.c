@@ -691,11 +691,11 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   bool captureOrPromotion, inCheck, doFullDepthSearch, moveCountPruning;
   bool ttCapture, singularQuietLMR;
   Piece movedPiece;
-  int moveCount, captureCount, quietCount;
+  int moveCount, captureCount, quietCount, bestMoveCount;
 
   // Step 1. Initialize node
   inCheck = checkers();
-  moveCount = captureCount = quietCount =  ss->moveCount = 0;
+  moveCount = bestMoveCount = captureCount = quietCount = ss->moveCount = 0;
   bestValue = -VALUE_INFINITE;
   maxValue = VALUE_INFINITE;
 
@@ -903,14 +903,30 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
              ? (ss->staticEval > (ss-4)->staticEval || (ss-4)->staticEval == VALUE_NONE)
              :  ss->staticEval > (ss-2)->staticEval;
 
-  // Step 7. Futility pruning: child node
+  // Step 7. Razoring
+  // If eval is really low check with qsearch if it can exceed alpha, if it can't,
+  // return a fail low.
+  if (   !PvNode
+      && depth <= 7
+      && eval < alpha - 348 - 258 * depth * depth)
+  {
+	value =
+        inCheck
+          ? qsearch_NonPV_true(pos, ss, alpha - 1, depth)
+          : qsearch_NonPV_false(pos, ss, alpha - 1, depth);
+    if (value < alpha)
+        return value;
+  }
+
+  // Step 8. Futility pruning: child node
   if (   !PvNode
       &&  depth < 9
-      &&  eval - futility_margin(depth, improving) >= beta
+      &&  eval - futility_margin(depth, improving) - (ss-1)->statScore / 256 >= beta
+      &&  eval >= beta
       &&  eval < VALUE_KNOWN_WIN)  // Do not return unproven wins
-    return eval; // - futility_margin(depth); (do not do the right thing)
+    return eval;
 
-  // Step 8. Null move search with verification search (is omitted in PV nodes)
+  // Step 9. Null move search with verification search (is omitted in PV nodes)
   if (   !PvNode
       && (ss-1)->currentMove != MOVE_NULL
       && (ss-1)->statScore < 24185
@@ -960,7 +976,7 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
 
   probCutBeta = beta + 209 - 44 * improving;
 
-  // Step 9. ProbCut
+  // Step 10. ProbCut
   // If we have a good enough capture and a reduced search returns a value
   // much above beta, we can (almost) safely prune the previous move.
   if (   !PvNode
@@ -1012,15 +1028,18 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
     ss->ttPv = ttPv;
   }
 
-  // Step 10. If the position is not in TT, decrease depth by 2
-  if (PvNode && depth >= 6 && !ttMove)
+  // Step 11. If the position is not in TT, decrease depth by 2
+  if (   PvNode
+      && depth >= 6
+      && !ttMove
+     )
     depth -= 2;
 
 moves_loop: // When in check search starts from here
 
   ttCapture = ttMove && is_capture_or_promotion(pos, ttMove);
 
-  // Step 11. A small Probcut idea, when we are in check
+  // Step 12. A small Probcut idea, when we are in check
   probCutBeta = beta + 400;
   if (   inCheck
       && !PvNode
@@ -1052,7 +1071,7 @@ moves_loop: // When in check search starts from here
                       && (tte_bound(tte) & BOUND_UPPER)
                       && tte_depth(tte) >= depth;
 
-  // Step 12. Loop through moves
+  // Step 13. Loop through moves
   // Loop through all pseudo-legal moves until no moves remain or a beta
   // cutoff occurs
   while ((move = next_move(pos, moveCountPruning))) {
@@ -1101,7 +1120,7 @@ moves_loop: // When in check search starts from here
     // Calculate new depth for this move
     newDepth = depth - 1;
 
-    // Step 13. Pruning at shallow depth
+    // Step 14. Pruning at shallow depth
     if (  !rootNode
         && non_pawn_material_c(stm())
         && bestValue > VALUE_TB_LOSS_IN_MAX_PLY)
@@ -1150,7 +1169,7 @@ moves_loop: // When in check search starts from here
       }
     }
 
-    // Step 14. Extensions
+    // Step 15. Extensions
 
     // Singular extension search. If all moves but one fail low on a search
     // of (alpha-s, beta-s), and just one fails high on (alpha, beta), then
@@ -1226,12 +1245,12 @@ moves_loop: // When in check search starts from here
     ss->currentMove = move;
     ss->history = &(*pos->counterMoveHistory)[inCheck][captureOrPromotion][movedPiece][to_sq(move)];
 
-    // Step 15. Make the move.
+    // Step 16. Make the move.
     do_move(pos, move, givesCheck);
     // HACK: Fix bench after introduction of 2-fold MultiPV bug
     if (rootNode) pos->st[-1].key ^= pos->rootKeyFlip;
 
-    // Step 16. Late moves reduction / extension (LMR)
+    // Step 17. Late moves reduction / extension (LMR)
     // We use various heuristics for the children of a node after the first
     // child has been searched. In general we would like to reduce them, but
     // there are many cases where we extend a child if it has good chances
@@ -1241,26 +1260,20 @@ moves_loop: // When in check search starts from here
         && (   !captureOrPromotion
             || moveCountPruning
             || ss->staticEval + PieceValue[EG][captured_piece()] <= alpha
-            || cutNode
             || (!PvNode && !formerPv && (*pos->captureHistory)[movedPiece][to_sq(move)][type_of_p(captured_piece())] < 3678)
             || pos->ttHitAverage < 432 * ttHitAverageResolution * ttHitAverageWindow / 1024)
         && (!PvNode || ss->ply > 1 || pos->threadIdx % 4 != 3))
     {
       Depth r = reduction(improving, depth, moveCount);
 
-      // Decrease reduction if the ttHit runing average is large
-      if (pos->ttHitAverage > 537 * ttHitAverageResolution * ttHitAverageWindow / 1024)
+      // Decrease reduction at some PvNodes
+      if (PvNode && bestMoveCount <= 3)
         r--;
 
       // Decrease reduction if position is or has been on the PV and the node
       // is not likely to fail low
       if (ss->ttPv && !likelyFailLow)
         r -= 2;
-
-      // Increase reduction at root and non-PV nodes when the best move
-      // does not change frequently
-      if ((rootNode || !PvNode) && pos->rootDepth > 10 && pos->bestMoveChanges <= 2)
-        r++;
 
       // Decrease reduction if opponent's move count is high
       if ((ss-1)->moveCount > 13)
@@ -1279,9 +1292,10 @@ moves_loop: // When in check search starts from here
         if (rootNode)
           r += pos->failedHighCnt * pos->failedHighCnt * moveCount / 512;
 
-        // Increase reduction for cut nodes
-        if (cutNode)
-          r += 2;
+        // Decrease reduction at PvNodes if bestvalue
+        // is vastly different from static evaluation
+        if (PvNode && !inCheck && abs(ss->staticEval - bestValue) > 250)
+            r--;
 
         ss->statScore =  (*cmh )[movedPiece][to_sq(move)]
                        + (*fmh )[movedPiece][to_sq(move)]
@@ -1295,7 +1309,7 @@ moves_loop: // When in check search starts from here
 
       Depth d = clamp(newDepth - r, 1, newDepth + (r < -1 && moveCount <= 5));
 
-      value = -search_NonPV(pos, ss+1, -(alpha+1), d, 1);
+      value = -search_NonPV(pos, ss+1, -(alpha+1), d, true);
 
       doFullDepthSearch = value > alpha && d < newDepth;
       didLMR = true;
@@ -1304,7 +1318,7 @@ moves_loop: // When in check search starts from here
       didLMR = false;
     }
 
-    // Step 17. Full depth search when LMR is skipped or fails high.
+    // Step 18. Full depth search when LMR is skipped or fails high.
     if (doFullDepthSearch) {
       value = -search_NonPV(pos, ss+1, -(alpha+1), newDepth, !cutNode);
 
@@ -1328,14 +1342,14 @@ moves_loop: // When in check search starts from here
       value = -search_PV(pos, ss+1, -beta, -alpha, min(maxNextDepth, newDepth));
     }
 
-    // Step 18. Undo move
+    // Step 19. Undo move
     // HACK: Fix bench after introduction of 2-fold MultiPV bug
     if (rootNode) pos->st[-1].key ^= pos->rootKeyFlip;
     undo_move(pos, move);
 
     assert(value > -VALUE_INFINITE && value < VALUE_INFINITE);
 
-    // Step 19. Check for a new best move
+    // Step 20. Check for a new best move
     // Finished searching the move. If a stop occurred, the return value of
     // the search cannot be trusted, and we return immediately without
     // updating best move, PV and TT.
@@ -1382,8 +1396,10 @@ moves_loop: // When in check search starts from here
         if (PvNode && !rootNode) // Update pv even in fail-high case
           update_pv(ss->pv, move, (ss+1)->pv);
 
-        if (PvNode && value < beta) // Update alpha! Always alpha < beta
+        if (PvNode && value < beta) { // Update alpha! Always alpha < beta
           alpha = value;
+          bestMoveCount++;
+        }
         else {
           assert(value >= beta); // Fail high
           ss->statScore = 0;
@@ -1409,7 +1425,7 @@ moves_loop: // When in check search starts from here
     return VALUE_DRAW;
   */
 
-  // Step 20. Check for mate and stalemate
+  // Step 21. Check for mate and stalemate
   // All legal moves have been searched and if there are no legal moves,
   // it must be a mate or a stalemate. If we are in a singular extension
   // search then return a fail low score.

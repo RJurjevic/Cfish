@@ -31,6 +31,26 @@
 #include "uci.h"
 #include "tbprobe.h"
 
+/*
+  V 12.0
+    - Cfish 12 modified so to use flipped HalfKP 256x2-32-32-1 NNUE.
+    - Used nn-4e52da8f037a.nnue NNUE aka nn-v0f000007015.nnue.
+
+  V 12.1
+    - Introduced Stockfish 15 search Step 7 Razoring.
+    - Introduced Stockfish 15 bestMoveCount and used in search Step 17 Late moves reduction / extension (LMR)
+    - In search Step 17 Late moves reduction / extension (LMR) removed decreasing reduction if the ttHit running average is large.
+    - In search Step 17 Late moves reduction / extension (LMR) removed increasing reduction at root and non-PV nodes when the best move does not change frequently.
+    - In search Step 17 Late moves reduction / extension (LMR) as in Stockfish 15 killer moves used to decide if to increase reduction for cut nodes.
+    - In search Step 17 Late moves reduction / extension (LMR) as in Stockfish 15 decreased reduction at PvNodes if bestvalue is vastly different from static evaluation.
+
+  V 12.2
+    - Used nn-85eb44d29a98.nnue NNUE aka nn-v0f000008045.nnue.
+    - In search Step 8 Futility pruning child node as in Stockfish 15 futility margin changed based on statScore.
+    - Quiet moves sort scoring updated to take into account if the piece is threatened as in Stockfish 15.
+    - In search Step 7 Razoring fixed a bug where we would call incorrect qsearch function if the move was non checking.
+*/
+
 int main(int argc, char **argv)
 {
   print_engine_info(false);

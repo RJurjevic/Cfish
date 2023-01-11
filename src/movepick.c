@@ -86,18 +86,36 @@ static void score_quiets(const Position *pos)
   PieceToHistory *fmh2 = (st-4)->history;
   PieceToHistory *fmh3 = (st-6)->history;
 
-  Color c = stm();
+  Color us = stm();
+  Color them = !us;
 
   for (ExtMove *m = st->cur; m < st->endMoves; m++) {
     uint32_t move = m->move & 4095;
-    Square to = move & 63;
+	Square to = move & 63;
     Square from = move >> 6;
-    m->value =      (*history)[c][move]
+    Piece pc = moved_piece(move);
+    Bitboard threatenedByPawn = attacks_from_pawn(from, them);
+    Bitboard threatenedByMinor = (attacks_from_knight(from) & pieces_cp(them, KNIGHT)) | attacks_bb_bishop(from, them) |
+                                  threatenedByPawn;
+    Bitboard threatenedByRook  = attacks_bb_rook(from, them) | threatenedByMinor;
+    Bitboard threatened = (pieces_cp(us, QUEEN) & threatenedByRook) | (pieces_cp(us, ROOK) & threatenedByMinor) |
+                         ((pieces_cp(us, KNIGHT) & (pieces_cp(us, BISHOP)) & threatenedByPawn));
+    Bitboard defendedByPawn = attacks_from_pawn(to, us);
+    Bitboard defendedByMinor = (attacks_from_knight(to) & pieces_cp(us, KNIGHT)) | attacks_bb_bishop(to, us) |
+                                defendedByPawn;
+    Bitboard defendedByRook  = attacks_bb_rook(to, us) | defendedByMinor;
+    m->value =      (*history)[us][move]
               + 2 * (*cmh)[piece_on(from)][to]
               +     (*fmh)[piece_on(from)][to]
               +     (*fmh2)[piece_on(from)][to]
               +     (*fmh3)[piece_on(from)][to]
-              + (st->mp_ply < MAX_LPH ? min(4, st->depth / 3) * (*lph)[st->mp_ply][move] : 0);
+              + (st->mp_ply < MAX_LPH ? min(4, st->depth / 3) * (*lph)[st->mp_ply][move] : 0)
+              +     (threatened ?
+                    (type_of_p(pc) == QUEEN && !defendedByRook  ? 50000
+                   : type_of_p(pc) == ROOK  && !defendedByMinor ? 25000
+                   :                           !defendedByPawn  ? 15000
+                   :                                                                       0)
+                   :                                                                       0);
   }
 }
 
@@ -109,14 +127,14 @@ static void score_evasions(const Position *pos)
 
   ButterflyHistory *history = pos->mainHistory;
   PieceToHistory *cmh = (st-1)->history;
-  Color c = stm();
+  Color us = stm();
 
   for (ExtMove *m = st->cur; m < st->endMoves; m++)
     if (is_capture(pos, m->move))
       m->value =  PieceValue[MG][piece_on(to_sq(m->move))]
                 - type_of_p(moved_piece(m->move));
     else
-      m->value =      (*history)[c][from_to(m->move)]
+      m->value =      (*history)[us][from_to(m->move)]
                 + 2 * (*cmh)[moved_piece(m->move)][to_sq(m->move)]
                 - (1 << 28);
 }

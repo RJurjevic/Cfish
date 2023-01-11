@@ -34,7 +34,7 @@
 
 // Version number. If Version is left empty, then compile date in the format
 // DD-MM-YY and show in engine_info.
-char Version[] = "";
+char Version[] = "12.2";
 
 #ifndef _WIN32
 pthread_mutex_t ioMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -54,7 +54,7 @@ void print_engine_info(bool to_uci)
 {
   char my_date[64];
 
-  printf("Cfish %s", Version);
+  printf("Vafra %s Cfish", Version);
 
   if (strlen(Version) == 0) {
     int day, month, year;
