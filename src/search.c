@@ -689,7 +689,7 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   Value bestValue, value, ttValue, eval, maxValue, probCutBeta;
   bool formerPv, givesCheck, improving, didLMR;
   bool captureOrPromotion, inCheck, doFullDepthSearch, moveCountPruning;
-  bool ttCapture, singularQuietLMR;
+  bool ttHit, ttCapture, singularQuietLMR;
   Piece movedPiece;
   int moveCount, captureCount, quietCount, bestMoveCount;
 
@@ -891,14 +891,17 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
         eval);
   }
 
+  // Use static evaluation difference to improve quiet move ordering
   if (   move_is_ok((ss-1)->currentMove)
       && !(ss-1)->checkersBB
       && !captured_piece())
   {
-    int bonus = clamp(-depth * 4 * ((ss-1)->staticEval + ss->staticEval - 2 * Tempo), -1000, 1000);
+    int bonus = clamp(-19 * (int)((ss-1)->staticEval + ss->staticEval), -1914, 1914);
     history_update(*pos->mainHistory, !stm(), (ss-1)->currentMove, bonus);
   }
 
+  // Set up the improving flag
+  // the improving flag is used in various pruning heuristics
   improving =  (ss-2)->staticEval == VALUE_NONE
              ? (ss->staticEval > (ss-4)->staticEval || (ss-4)->staticEval == VALUE_NONE)
              :  ss->staticEval > (ss-2)->staticEval;
@@ -907,10 +910,10 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   // If eval is really low check with qsearch if it can exceed alpha, if it can't,
   // return a fail low.
   if (   !PvNode
-      && depth <= 7
-      && eval < alpha - 348 - 258 * depth * depth)
+      && depth <= 4
+      && eval < alpha - 369 - 254 * depth * depth)
   {
-	value =
+    value =
         inCheck
           ? qsearch_NonPV_true(pos, ss, alpha - 1, depth)
           : qsearch_NonPV_false(pos, ss, alpha - 1, depth);
@@ -1028,12 +1031,18 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
     ss->ttPv = ttPv;
   }
 
-  // Step 11. If the position is not in TT, decrease depth by 2
+  // Step 11. Internal iterative deepening
   if (   PvNode
       && depth >= 6
       && !ttMove
      )
-    depth -= 2;
+  {
+    Depth d = depth - 2;
+    search_PV(pos, ss, alpha, beta, d);
+
+    tte = tt_probe(posKey, &ttHit);
+    ttMove = ttHit ? tte_move(tte) : 0;
+  }
 
 moves_loop: // When in check search starts from here
 
@@ -1251,18 +1260,13 @@ moves_loop: // When in check search starts from here
     if (rootNode) pos->st[-1].key ^= pos->rootKeyFlip;
 
     // Step 17. Late moves reduction / extension (LMR)
-    // We use various heuristics for the children of a node after the first
-    // child has been searched. In general we would like to reduce them, but
-    // there are many cases where we extend a child if it has good chances
-    // to be "interesting".
-    if (    depth >= 3
-        &&  moveCount > 1 + 2 * rootNode
-        && (   !captureOrPromotion
-            || moveCountPruning
-            || ss->staticEval + PieceValue[EG][captured_piece()] <= alpha
-            || (!PvNode && !formerPv && (*pos->captureHistory)[movedPiece][to_sq(move)][type_of_p(captured_piece())] < 3678)
-            || pos->ttHitAverage < 432 * ttHitAverageResolution * ttHitAverageWindow / 1024)
-        && (!PvNode || ss->ply > 1 || pos->threadIdx % 4 != 3))
+    // We use various heuristics for the sons of a node after the first son has
+    // been searched. In general we would like to reduce them, but there are many
+    // cases where we extend a son if it has good chances to be "interesting".
+    if (    depth >= (PvNode ? 3 : 2)
+        &&  moveCount > 1 + (PvNode && ss->ply <= 1)
+        && (   !ss->ttPv
+            || !captureOrPromotion))
     {
       Depth r = reduction(improving, depth, moveCount);
 
@@ -1284,10 +1288,6 @@ moves_loop: // When in check search starts from here
         r--;
 
       if (!captureOrPromotion) {
-        // Increase reduction if ttMove is a capture
-        if (ttCapture)
-          r++;
-
         // Increase reduction at root if failing high
         if (rootNode)
           r += pos->failedHighCnt * pos->failedHighCnt * moveCount / 512;
@@ -1307,7 +1307,10 @@ moves_loop: // When in check search starts from here
           r -= ss->statScore / 14790;
       }
 
-      Depth d = clamp(newDepth - r, 1, newDepth + (r < -1 && moveCount <= 5));
+      // In general we want to cap the LMR depth search at newDepth, but when
+      // reduction is negative, we allow this move a limited search extension
+      // beyond the first move depth. This may lead to hidden double extensions.
+      Depth d = clamp(newDepth - r, (PvNode ? 2 : 1), newDepth + 1);
 
       value = -search_NonPV(pos, ss+1, -(alpha+1), d, true);
 

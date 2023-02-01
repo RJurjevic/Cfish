@@ -49,6 +49,15 @@
     - In search Step 8 Futility pruning child node as in Stockfish 15 futility margin changed based on statScore.
     - Quiet moves sort scoring updated to take into account if the piece is threatened as in Stockfish 15.
     - In search Step 7 Razoring fixed a bug where we would call incorrect qsearch function if the move was non checking.
+
+  V 12.3
+    - Used nn-268f1649a50c.nnue NNUE aka nn-v0f000008061.nnue.
+    - In search Step 6 Static evaluation of the position used Stockfish 16 dev static evaluation difference to improve quiet move ordering.
+    - In search Step 7 Razoring razoring implemented similarly as in Stockfish 16 dev.
+    - In search Step 11 Internal iterative deepening implemented internal iterative deepening similar like in Cfish 9.
+    - In search Step 17 Late moves reduction / extension (LMR) used criteria for LMR similar as in later Stockfish.
+    - In search Step 17 Late moves reduction / extension (LMR) removed decreasing reduction if ttMove is a capture.
+    - In search Step 17 Late moves reduction / extension (LMR) used criteria for capping LMR depth like in later Stockfish.
 */
 
 int main(int argc, char **argv)
