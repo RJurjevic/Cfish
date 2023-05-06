@@ -58,6 +58,11 @@
     - In search Step 17 Late moves reduction / extension (LMR) used criteria for LMR similar as in later Stockfish.
     - In search Step 17 Late moves reduction / extension (LMR) removed decreasing reduction if ttMove is a capture.
     - In search Step 17 Late moves reduction / extension (LMR) used criteria for capping LMR depth like in later Stockfish.
+
+  V 12.4
+    - Used nn-62fa8067463a.nnue NNUE aka nn-v0f000009011.nnue.
+    - Updated scoring of quiet moves.
+    - In search Step 11 Internal iterative deepening implemented internal iterative deepening as in Cfish 9.
 */
 
 int main(int argc, char **argv)

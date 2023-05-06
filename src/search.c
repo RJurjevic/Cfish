@@ -1032,13 +1032,16 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   }
 
   // Step 11. Internal iterative deepening
-  if (   PvNode
+  if (   !ttMove
       && depth >= 6
-      && !ttMove
+      && (PvNode || ss->staticEval + 256 >= beta)
      )
   {
-    Depth d = depth - 2;
-    search_PV(pos, ss, alpha, beta, d);
+    Depth d = 3 * depth / 4 - 2;
+    if (PvNode)
+      search_PV(pos, ss, alpha, beta, d);
+    else
+      search_NonPV(pos, ss, alpha, d, cutNode);
 
     tte = tt_probe(posKey, &ttHit);
     ttMove = ttHit ? tte_move(tte) : 0;

@@ -99,21 +99,21 @@ static void score_quiets(const Position *pos)
                                   threatenedByPawn;
     Bitboard threatenedByRook  = attacks_bb_rook(from, them) | threatenedByMinor;
     Bitboard threatened = (pieces_cp(us, QUEEN) & threatenedByRook) | (pieces_cp(us, ROOK) & threatenedByMinor) |
-                         ((pieces_cp(us, KNIGHT) & (pieces_cp(us, BISHOP)) & threatenedByPawn));
-    Bitboard defendedByPawn = attacks_from_pawn(to, us);
-    Bitboard defendedByMinor = (attacks_from_knight(to) & pieces_cp(us, KNIGHT)) | attacks_bb_bishop(to, us) |
-                                defendedByPawn;
-    Bitboard defendedByRook  = attacks_bb_rook(to, us) | defendedByMinor;
+                          (pieces_cp(us, KNIGHT) & threatenedByMinor) | (pieces_cp(us, BISHOP) & threatenedByMinor);
+    Bitboard ambushedByPawn = attacks_from_pawn(to, them);
+    Bitboard ambushedByMinor = (attacks_from_knight(to) & pieces_cp(them, KNIGHT)) | attacks_bb_bishop(to, them) |
+                                ambushedByPawn;
+    Bitboard ambushedByRook  = attacks_bb_rook(to, them) | ambushedByMinor;
     m->value =      (*history)[us][move]
               + 2 * (*cmh)[piece_on(from)][to]
               +     (*fmh)[piece_on(from)][to]
               +     (*fmh2)[piece_on(from)][to]
               +     (*fmh3)[piece_on(from)][to]
               + (st->mp_ply < MAX_LPH ? min(4, st->depth / 3) * (*lph)[st->mp_ply][move] : 0)
-              +     (threatened ?
-                    (type_of_p(pc) == QUEEN && !defendedByRook  ? 50000
-                   : type_of_p(pc) == ROOK  && !defendedByMinor ? 25000
-                   :                           !defendedByPawn  ? 15000
+              -     (threatened ?
+                    (type_of_p(pc) == QUEEN && !ambushedByRook  ? 50000
+                   : type_of_p(pc) == ROOK  && !ambushedByMinor ? 25000
+                   :                           !ambushedByPawn  ? 15000
                    :                                                                       0)
                    :                                                                       0);
   }
