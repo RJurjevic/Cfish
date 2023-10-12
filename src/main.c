@@ -63,6 +63,10 @@
     - Used nn-62fa8067463a.nnue NNUE aka nn-v0f000009011.nnue.
     - Updated scoring of quiet moves.
     - In search Step 11 Internal iterative deepening implemented internal iterative deepening as in Cfish 9.
+
+  V 12.5
+    - Used nn-017411c866a4.nnue NNUE aka nn-v0f000009305.nnue.
+    - Updated Makefile to download nets from www.jurjevic.org.uk.
 */
 
 int main(int argc, char **argv)
