@@ -11,19 +11,19 @@ cd src
 # build Cfish executable
 make clean
 make build ARCH=x86-64-vnni
-mv cfish.exe cfish_v12.5_x86-64_vnni_windows.exe
-cp cfish.bmp cfish_v12.5_x86-64_vnni_windows.bmp
+mv cfish.exe cfish_v12.6_x86-64_vnni_windows.exe
+cp cfish.bmp cfish_v12.6_x86-64_vnni_windows.bmp
 make clean
 make build ARCH=x86-64-avx512
-mv cfish.exe cfish_v12.5_x86-64_avx512_windows.exe
-cp cfish.bmp cfish_v12.5_x86-64_avx512_windows.bmp
+mv cfish.exe cfish_v12.6_x86-64_avx512_windows.exe
+cp cfish.bmp cfish_v12.6_x86-64_avx512_windows.bmp
 make clean
 make build ARCH=x86-64-avx2 
-mv cfish.exe cfish_v12.5_x86-64_avx2_windows.exe
-cp cfish.bmp cfish_v12.5_x86-64_avx2_windows.bmp
+mv cfish.exe cfish_v12.6_x86-64_avx2_windows.exe
+cp cfish.bmp cfish_v12.6_x86-64_avx2_windows.bmp
 make clean
 make build ARCH=x86-64-sse41
-mv cfish.exe cfish_v12.5_x86-64_sse41_windows.exe
-cp cfish.bmp cfish_v12.5_x86-64_sse41_windows.bmp
+mv cfish.exe cfish_v12.6_x86-64_sse41_windows.exe
+cp cfish.bmp cfish_v12.6_x86-64_sse41_windows.bmp
 make clean
 cd ..

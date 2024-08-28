@@ -279,7 +279,7 @@ void thread_wake_up(Position *pos, int action)
 
 #endif
 
-  if (action != THREAD_RESUME)
+  if (action != THREAD_CONTINUE)
     pos->action = action;
 
 #ifndef _WIN32

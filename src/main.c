@@ -67,6 +67,10 @@
   V 12.5
     - Used nn-017411c866a4.nnue NNUE aka nn-v0f000009305.nnue.
     - Updated Makefile to download nets from www.jurjevic.org.uk.
+
+  V 12.6
+    - Used nn-7f1489a0278c.nnue NNUE aka nn-v0f000011203.nnue.
+    - In search Step 11, adjusted the criteria for when to apply internal iterative deepening.
 */
 
 int main(int argc, char **argv)
