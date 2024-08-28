@@ -100,4 +100,4 @@ This option only appears on NUMA machines, i.e. machines with two or more CPUs. 
 4. Close the MSYS2 MinGW 64-bit terminal and open another.
 
 ## Vafra Cfish
-Robert Jurjevic maintains this Cfish clone (starting from Cfish 12). Robert has a long experience in maintaining Crafty (Prof Robert Hyatt) clone named Vafra (Robert's Crafty clone). Robert switched to Vafra Cfish clone which uses (as well as some later Vafra Crafty clones) NNUE of the same architecture as Cfish 12, i.e., (flipped, not rotated) HalfKP 256x2-32-32-1.
+Robert Jurjevic is the maintainer of this Cfish clone, starting from Cfish 12. He has extensive experience maintaining Vafra, a Crafty clone originally developed by Prof. Robert Hyatt. Robert transitioned to the Vafra Cfish clone, which, like some of the later Vafra Crafty versions, utilizes an NNUE with the same architecture as Cfish 12—specifically, the flipped (not rotated) HalfKP 256x2-32-32-1.
