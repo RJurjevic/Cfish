@@ -73,7 +73,7 @@
     - In search Step 11, adjusted the criteria for when to apply internal iterative deepening.
 
   V 12.7
-    - Used nn-93916e03cf0b.nnue NNUE aka nn-v0f000011300.nnue.
+    - Used nn-88f59c2a717f.nnue NNUE aka nn-v0f000011400.nnue.
 */
 
 int main(int argc, char **argv)
