@@ -110,5 +110,6 @@ In his work, Robert has leveraged **Leela** training data to fine-tune the NNUE 
 
 Robert expresses his gratitude to the **Leela** and **Stockfish** teams, and to **Ronald de Man** for creating Cfish. Moving forward, Robert plans to further expand the dataset for training, explore enhancements in Nodchip’s NNUE trainer, and investigate methods for reusing random seeding data to achieve greater consistency and performance in future releases.
 
-![alt text](https://github.com/RJurjevic/Cfish/blob/main/vafra-logo.jpg?raw=true)
+![Vafra Logo](https://github.com/RJurjevic/Cfish/blob/master/vafra-logo.jpg?raw=true)
+
 
