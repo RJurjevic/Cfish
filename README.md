@@ -100,15 +100,12 @@ This option only appears on NUMA machines, i.e. machines with two or more CPUs. 
 4. Close the MSYS2 MinGW 64-bit terminal and open another.
 
 ## Vafra Cfish
-Robert Jurjevic, an experienced engine maintainer, has overseen the development of **Vafra Cfish** starting from **Cfish 12**, evolving the project to new heights. The name **Vafra** originates from Latin, meaning "crafty" or "sly," chosen as a nod to Robert’s long-standing work with his previous chess engine, **Vafra**—a clone of **Crafty**, the influential chess engine developed by **Professor Robert Hyatt**. Robert exchanged hundreds of emails with Professor Hyatt during the development of Vafra Crafty. While initially integrating **NNUE** (Neural Network Upscaling Evaluation) into Crafty, Robert eventually transitioned to working fully on Cfish, where he found further success in refining the engine’s performance.
 
-The current version of Vafra Cfish continues to utilize the **flipped, not rotated HalfKP 256x2-32-32-1 NNUE architecture**, offering an efficient balance between computational speed and accuracy. Robert has made slight adjustments to the **Cfish search algorithms**, incorporating his own ideas while retaining the core strength of the engine.
+Vafra Cfish, maintained by Robert Jurjevic since Cfish 12, takes its name from the Latin word *vafra*, meaning "crafty," as a nod to Robert’s earlier work on a Crafty clone, created by **Professor Robert Hyatt**.
 
-One of the key aspects of Robert’s work is that he trains the **NNUE exclusively on Leela data**. To facilitate this, he developed a small suite of **C# programs** to convert Leela data into the **Stockfish format**. These tools were necessary to filter out **Fischer Random Chess (FRC) positions**, some of which are written in a non-standard format that could interfere with the training process. While the **Leela team** graciously provided him with a tool called the **rescorer**, which is the core for converting Leela data, Robert’s C# programs are essential to make the data compatible with his ever-so-slightly modified **Nodchip’s trainer**. This entire process, from downloading the Leela data to conversion, is fully automated.
+Vafra Cfish uses the flipped, not rotated, **HalfKP 256x2-32-32-1 NNUE architecture**. Robert trains the NNUE exclusively on Leela data, using a C# suite he developed to convert Leela data to Stockfish format, filtering out FRC positions. The Leela team provided a tool, *rescorer*, for data conversion, and this process is fully automated.
 
-In his work, Robert has leveraged **Leela** training data to fine-tune the NNUE nets and runs extensive tests comparing **Vafra Cfish** to **Stockfish 17**, using advanced evaluation techniques such as the **quality (Q)** metric. These tests, along with the incremental refinements to Cfish's search mechanisms, ensure that Vafra Cfish remains competitive against the strongest chess engines.
-
-Robert expresses his gratitude to the **Leela** and **Stockfish** teams, and to **Ronald de Man** for creating Cfish. Moving forward, Robert plans to further expand the dataset for training, explore enhancements in Nodchip’s NNUE trainer, and investigate methods for reusing random seeding data to achieve greater consistency and performance in future releases.
+Robert thanks the **Stockfish team** for creating Stockfish and for the opportunity to briefly be an informal member of the team, where he learned more about the process. He also extends his gratitude to the **Leela team** for publicly providing their data and the *rescorer* program, as well as to **Ronald de Man** for creating Cfish.
 
 ![Vafra Logo](https://github.com/RJurjevic/Cfish/blob/master/vafra-logo.jpg?raw=true)
 
