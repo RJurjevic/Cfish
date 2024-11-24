@@ -103,7 +103,9 @@ This option only appears on NUMA machines, i.e. machines with two or more CPUs. 
 
 Vafra Cfish, maintained by Robert Jurjevic since Cfish 12, takes its name from the Latin word *vafra*, meaning "crafty," as a nod to Robert’s earlier work on a Crafty clone, created by **Professor Robert Hyatt**.
 
-Vafra Cfish uses the flipped, not rotated, **HalfKP 256x2-32-32-1 NNUE architecture**. Robert trains the NNUE exclusively on Leela data, using a C# suite he developed to convert Leela data to Stockfish format, filtering out FRC positions. The Leela team provided a tool, *rescorer*, for data conversion, and this process is fully automated.
+Vafra Cfish uses the flipped, not rotated, **HalfKP 256x2-32-32-1 NNUE architecture**. Robert trains the NNUE exclusively on Leela data, employing a combination of tools for data conversion. He uses a C# suite he developed to filter out FRC positions from the Leela dataset, as Vafra is specifically tuned for standard chess rather than FRC. Additionally, some FRC positions output by Leela’s *rescorer* tool use a non-standard format that, when converted, can cause Nodchip’s trainer to crash. To address this, Robert’s pipeline ensures that such positions are excluded. He also utilizes the tools version of Stockfish, which can read textual FEN format output from Leela’s *rescorer* and convert it into Stockfish’s binary FEN format. 
+
+The training itself is conducted using Robert’s **ever-so-slightly modified version of Nodchip’s trainer**, allowing him to fine-tune the process and adapt the training schedule and parameters for optimal results. This automated and customized pipeline ensures efficient and robust preparation and training of NNUE nets from scratch.  
 
 Robert thanks the **Stockfish team** for creating Stockfish and for the opportunity to briefly be an informal member of the team, where he learned more about the process. He also extends his gratitude to the **Leela team** for publicly providing their data and the *rescorer* program, as well as to **Ronald de Man** for creating Cfish.
 
