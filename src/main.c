@@ -74,6 +74,9 @@
 
   V 12.7
     - Used nn-706a9fe25219.nnue NNUE aka nn-v0f000011601.nnue.
+
+  V 12.8
+    - Used nn-706a9fe25219.nnue NNUE aka nn-v0f000011601.nnue.
 */
 
 int main(int argc, char **argv)
