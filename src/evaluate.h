@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-#define DefaultEvalFile "nn-706a9fe25219.nnue"
+#define DefaultEvalFile "nn-6ebeca8442d2.nnue"
 
 enum { Tempo = 28 };
 
