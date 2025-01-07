@@ -110,6 +110,7 @@ static void score_quiets(const Position *pos)
               +     (*fmh2)[piece_on(from)][to]
               +     (*fmh3)[piece_on(from)][to]
               + (st->mp_ply < MAX_LPH ? min(4, st->depth / 3) * (*lph)[st->mp_ply][move] : 0)
+              + gives_check(pos, pos->st, m->move) * 16384
               -     (threatened ?
                     (type_of_p(pc) == QUEEN && !ambushedByRook  ? 50000
                    : type_of_p(pc) == ROOK  && !ambushedByMinor ? 25000

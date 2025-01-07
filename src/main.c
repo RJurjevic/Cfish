@@ -74,9 +74,11 @@
 
   V 12.7
     - Used nn-706a9fe25219.nnue NNUE aka nn-v0f000011601.nnue.
-	
+
   V 12.8
-    - Used nn-6ebeca8442d2.nnue NNUE aka nn-v0f000011700.nnue.	
+    - Used nn-6ebeca8442d2.nnue NNUE aka nn-v0f000011700.nnue.
+    - Updated quiet move sorting to factor in whether the move results in a check, as in later Stockfish versions.
+
 */
 
 int main(int argc, char **argv)
