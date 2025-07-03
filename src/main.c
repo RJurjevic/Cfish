@@ -76,7 +76,7 @@
     - Used nn-706a9fe25219.nnue NNUE aka nn-v0f000011601.nnue.
 
   V 12.8
-    - Used nn-0357b00352b6.nnue NNUE aka nn-v0f000011770.nnue.
+    - Used nn-e765808baa0e.nnue NNUE aka nn-v0f000011780.nnue.
     - Updated quiet move sorting to factor in whether the move results in a check, as in later Stockfish versions.
 
 */
