@@ -902,9 +902,7 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
 
   // Set up the improving flag
   // the improving flag is used in various pruning heuristics
-  improving =  (ss-2)->staticEval == VALUE_NONE
-             ? (ss->staticEval > (ss-4)->staticEval || (ss-4)->staticEval == VALUE_NONE)
-             :  ss->staticEval > (ss-2)->staticEval;
+  improving = ss->staticEval > (ss-2)->staticEval;
 
   // Step 7. Razoring
   // If eval is really low check with qsearch if it can exceed alpha, if it can't,
@@ -1188,7 +1186,8 @@ moves_loop: // When in check search starts from here
     // that move is singular and should be extended. To verify this we do a
     // reduced search on all the other moves but the ttMove and if the
     // result is lower than ttValue minus a margin, then we extend the ttMove.
-    if (    depth >= 7
+    // We take care to not overdo to avoid search getting stuck.
+    if (    ss->ply < pos->rootDepth * 2
         &&  move == ttMove
         && !rootNode
         && !excludedMove // No recursive singular search
@@ -1289,6 +1288,10 @@ moves_loop: // When in check search starts from here
       // Decrease reduction if ttMove has been singularly extended
       if (singularQuietLMR)
         r--;
+
+      // Increase reduction if ttMove is a capture but the current move is not a capture
+      if (ttCapture && !captureOrPromotion)
+        r++;
 
       if (!captureOrPromotion) {
         // Increase reduction at root if failing high

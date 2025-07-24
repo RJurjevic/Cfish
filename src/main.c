@@ -78,7 +78,9 @@
   V 12.8
     - Used nn-1508a70d987f.nnue NNUE aka nn-v0f000011790.nnue.
     - Updated quiet move sorting to factor in whether the move results in a check, as in later Stockfish versions.
-
+    - In search improving flag implemented as in Stockfish 17.1.
+    - In search Step 15 Extensions used singular extension search depth criteria like in Stockfish 17.1.
+    - In search Step 17 Late moves reduction / extension (LMR) increased reduction if ttMove is a capture but the current move is not as in Stockfish 17.1.
 */
 
 int main(int argc, char **argv)
