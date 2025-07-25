@@ -76,7 +76,7 @@
     - Used nn-706a9fe25219.nnue NNUE aka nn-v0f000011601.nnue.
 
   V 12.8
-    - Used nn-1508a70d987f.nnue NNUE aka nn-v0f000011790.nnue.
+    - Used nn-9ae2834e2a21.nnue NNUE aka nn-v0f000011790.nnue.
     - Updated quiet move sorting to factor in whether the move results in a check, as in later Stockfish versions.
     - In search improving flag implemented as in Stockfish 17.1.
     - In search Step 15 Extensions used singular extension search depth criteria like in Stockfish 17.1.
