@@ -76,11 +76,13 @@
     - Used nn-706a9fe25219.nnue NNUE aka nn-v0f000011601.nnue.
 
   V 12.8
-    - Used nn-1590a1b77c10.nnue NNUE aka nn-v0f000011800.nnue.
+    - Used nn-9c74f0165df3.nnue NNUE aka nn-v0f000011800.nnue.
     - Updated quiet move sorting to factor in whether the move results in a check, as in later Stockfish versions.
     - In search improving flag implemented as in Stockfish 17.1.
     - In search Step 15 Extensions used singular extension search depth criteria like in Stockfish 17.1.
     - In search Step 17 Late moves reduction / extension (LMR) increased reduction if ttMove is a capture but the current move is not as in Stockfish 17.1.
+    - In search Step 7 Razoring skip when in check and increase razoring margin when the improving flag is set.
+    - In search Step 11 Internal iterative deepening clamp the reduced depth to at least 1 ply and use a zero-window probe at Non-PV nodes.
 */
 
 int main(int argc, char **argv)
