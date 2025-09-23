@@ -81,8 +81,8 @@
     - In search improving flag implemented as in Stockfish 17.1.
     - In search Step 15 Extensions used singular extension search depth criteria like in Stockfish 17.1.
     - In search Step 17 Late moves reduction / extension (LMR) increased reduction if ttMove is a capture but the current move is not as in Stockfish 17.1.
-    - In search Step 7 Razoring skip when in check and increase razoring margin when the improving flag is set.
-    - In search Step 11 Internal iterative deepening clamp the reduced depth to at least 1 ply and use a zero-window probe at Non-PV nodes.
+    - In search Step 7 Razoring skipped when in check and increased razoring margin when the improving flag is set.
+    - In search Step 11 Internal iterative deepening clamped the reduced depth to at least 1 ply and used a zero-window probe at Non-PV nodes.
 */
 
 int main(int argc, char **argv)
