@@ -905,19 +905,18 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   improving = ss->staticEval > (ss-2)->staticEval;
 
   // Step 7. Razoring
-  // If eval is really low, check with qsearch if it can exceed alpha; if it can't, return fail-low.
-  // Skip razoring when in check. Increase margin slightly when improving.
+  // If eval is really low check with qsearch if it can exceed alpha, if it can't,
+  // return a fail low.
   if (   !PvNode
-      && !inCheck
-      && depth <= 4)
+      && depth <= 4
+      && eval < alpha - 369 - 254 * depth * depth)
   {
-      int margin = 369 + 254 * depth * depth + (improving ? 96 : 0);
-      if (eval < alpha - margin)
-      {
-          value = qsearch_NonPV_false(pos, ss, alpha - 1, depth);
-          if (value < alpha)
-              return value;
-      }
+    value =
+        inCheck
+          ? qsearch_NonPV_true(pos, ss, alpha - 1, depth)
+          : qsearch_NonPV_false(pos, ss, alpha - 1, depth);
+    if (value < alpha)
+        return value;
   }
 
   // Step 8. Futility pruning: child node
@@ -1031,19 +1030,16 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   }
 
   // Step 11. Internal iterative deepening
-  // If no ttMove and depth is sufficient, probe a reduced-depth search to obtain a move for ordering.
-  // Use a slightly reduced depth, clamp to at least 1 ply, and for Non-PV use a zero-window probe.
   if (   !ttMove
       && depth >= 6
-      && (PvNode || ss->staticEval + 256 >= beta))
+      && (PvNode || ss->staticEval + 256 >= beta)
+     )
   {
     Depth d = 3 * depth / 4 - 2;
-    if (d < 1) d = 1;  // clamp
-
     if (PvNode)
       search_PV(pos, ss, alpha, beta, d);
     else
-      search_NonPV(pos, ss, beta - 1, d, cutNode);  // zero-window probe is sufficient
+      search_NonPV(pos, ss, alpha, d, cutNode);
 
     tte = tt_probe(posKey, &ttHit);
     ttMove = ttHit ? tte_move(tte) : 0;
