@@ -1273,13 +1273,31 @@ moves_loop: // When in check search starts from here
       Depth r = reduction(improving, depth, moveCount);
 
       // Decrease reduction at some PvNodes
-      if (PvNode && bestMoveCount <= 3)
-        r--;
+      if (PvNode) {
+        int protect = depth >= 12 ? 3 : depth >= 8 ? 2 : 1;
+        if (bestMoveCount <= protect)
+          r--;
+      }
+
+      // Increase reduction at some PvNodes
+      if (PvNode && bestMoveCount >= 6)
+          r++;
 
       // Decrease reduction if position is or has been on the PV and the node
       // is not likely to fail low
-      if (ss->ttPv && !likelyFailLow)
-        r -= 2;
+      if (ss->ttPv) {
+        const bool quietLike      = !captureOrPromotion;
+        const bool earlyCandidate = moveCount <= 8;
+        if (!likelyFailLow) {
+          int pvProtect = 1;
+          if (depth >= 12)           pvProtect++;
+          if (improving && depth>=8) pvProtect++;
+          if (!quietLike)            pvProtect = 1;
+          if (!earlyCandidate)       pvProtect = 1;
+          if (pvProtect > 2)         pvProtect = 2;
+          r -= pvProtect;
+        }
+      }
 
       // Decrease reduction if opponent's move count is high
       if ((ss-1)->moveCount > 13)
