@@ -76,7 +76,7 @@
     - Used nn-706a9fe25219.nnue NNUE aka nn-v0f000011601.nnue.
 
   V 12.8
-    - Used nn-577d2b5ea71c.nnue NNUE aka nn-v0f000012020.nnue.
+    - Used nn-309ffdbd6879.nnue NNUE aka nn-v0f000012020.nnue.
     - Updated quiet move sorting to factor in whether the move results in a check, as in later Stockfish versions.
     - In search improving flag implemented as in Stockfish 17.1.
     - In search Step 15 Extensions used singular extension search depth criteria like in Stockfish 17.1.
@@ -84,6 +84,7 @@
     - In search Step 17 Late moves reduction / extension (LMR) increased reduction if ttMove is a capture but the current move is not as in Stockfish 17.1.
     - In search Step 17 Late moves reduction / extension (LMR) updated reduction adjustment at some PvNodes as per ChatGPT 5.
     - In search Step 17 Late moves reduction / extension (LMR) updated reduction adjustment if position is or has been on the PV and the node is not likely to fail low as per ChatGPT 5.
+	- Fixed binomial coefficient initialization in tbprobe.
 */
 
 int main(int argc, char **argv)
