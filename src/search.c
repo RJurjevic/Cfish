@@ -1329,6 +1329,10 @@ moves_loop: // When in check search starts from here
 
         if (!inCheck)
           r -= ss->statScore / 14790;
+
+        // Reduce checks a bit less
+        if (givesCheck && improving && depth >= 3 && r > 0 && (PvNode || ss->ttPv))
+          r--;
       }
 
       // In general we want to cap the LMR depth search at newDepth, but when
