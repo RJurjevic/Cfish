@@ -718,8 +718,7 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   if (!rootNode) {
     // Step 2. Check for aborted search and immediate draw
     if (load_rlx(Threads.stop) || is_draw(pos) || ss->ply >= MAX_PLY)
-      return  ss->ply >= MAX_PLY && !inCheck ? evaluate(pos)
-                                             : value_draw(pos);
+      return ss->ply >= MAX_PLY ? evaluate(pos) : value_draw(pos);
 
     // Step 3. Mate distance pruning. Even if we mate at the next move our
     // score would be at best mate_in(ss->ply+1), but if alpha is already
@@ -911,10 +910,7 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
       && depth <= 4
       && eval < alpha - 369 - 254 * depth * depth)
   {
-    value =
-        inCheck
-          ? qsearch_NonPV_true(pos, ss, alpha - 1, depth)
-          : qsearch_NonPV_false(pos, ss, alpha - 1, depth);
+    value = qsearch_NonPV_false(pos, ss, alpha - 1, depth);
     if (value < alpha)
         return value;
   }
@@ -1329,10 +1325,6 @@ moves_loop: // When in check search starts from here
 
         if (!inCheck)
           r -= ss->statScore / 14790;
-
-        // Decrease reduction for quiet checking moves near PvNodes
-        if ((PvNode || ss->ttPv) && givesCheck && improving && depth >= 12)
-          r--;
       }
 
       // In general we want to cap the LMR depth search at newDepth, but when
