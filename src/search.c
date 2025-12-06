@@ -718,7 +718,8 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   if (!rootNode) {
     // Step 2. Check for aborted search and immediate draw
     if (load_rlx(Threads.stop) || is_draw(pos) || ss->ply >= MAX_PLY)
-      return ss->ply >= MAX_PLY ? evaluate(pos) : value_draw(pos);
+      return  ss->ply >= MAX_PLY && !inCheck ? evaluate(pos)
+                                             : value_draw(pos);
 
     // Step 3. Mate distance pruning. Even if we mate at the next move our
     // score would be at best mate_in(ss->ply+1), but if alpha is already
@@ -864,7 +865,7 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   // Step 6. Static evaluation of the position
   if (inCheck) {
     // Skip early pruning when in check
-    ss->staticEval = eval = VALUE_NONE;
+    ss->staticEval = eval = (ss-2)->staticEval;
     improving = false;
     goto moves_loop;
   } else if (ss->ttHit) {
