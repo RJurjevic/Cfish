@@ -85,7 +85,6 @@
     - In search Step 17 Late moves reduction / extension (LMR) updated reduction adjustment if position is or has been on the PV and the node is not likely to fail low as per ChatGPT 5.
     - Fixed binomial coefficient initialization in tbprobe.
     - In search Step 7 Razoring simplified Non-PV razoring to always use non-check quiescence search for the verification as per ChatGPT 5.1.
-    - In search Step 6 Static evaluation of the position reused static evaluation from two plies earlier when in check instead of VALUE_NONE as per ChatGPT 5.1.
 */
 
 int main(int argc, char **argv)

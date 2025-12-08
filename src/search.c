@@ -865,7 +865,7 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   // Step 6. Static evaluation of the position
   if (inCheck) {
     // Skip early pruning when in check
-    ss->staticEval = eval = (ss-2)->staticEval;
+    ss->staticEval = eval = VALUE_NONE;
     improving = false;
     goto moves_loop;
   } else if (ss->ttHit) {
