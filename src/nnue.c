@@ -641,8 +641,13 @@ void nnue_init(void)
 {
 #ifndef NNUE_PURE
   const char *s = option_string_value(OPT_USE_NNUE);
-  useNNUE =  strcmp(s, "classical") == 0 ? EVAL_CLASSICAL
-           : strcmp(s, "pure"     ) == 0 ? EVAL_PURE : EVAL_HYBRID;
+
+  if (!strcmp(s, "classical") || !strcmp(s, "Classical"))
+    useNNUE = EVAL_CLASSICAL;
+  else if (!strcmp(s, "pure") || !strcmp(s, "Pure"))
+    useNNUE = EVAL_PURE;
+  else
+    useNNUE = EVAL_HYBRID;
 #endif
 
   const char *evalFile = option_string_value(OPT_EVAL_FILE);

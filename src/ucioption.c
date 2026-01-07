@@ -130,7 +130,7 @@ static Option optionsMap[] = {
   { "EvalFile", OPT_TYPE_STRING, 0, 0, 0, DefaultEvalFile, NULL, 0, NULL },
 #ifndef NNUE_PURE
   { "Use NNUE", OPT_TYPE_COMBO, 0, 0, 0,
-    "Hybrid var Hybrid var Pure var Classical", NULL, 0, NULL },
+    "Pure var Hybrid var Pure var Classical", NULL, 0, NULL },
 #endif
 #endif
   { "LargePages", OPT_TYPE_CHECK, 1, 0, 0, NULL, on_large_pages, 0, NULL },

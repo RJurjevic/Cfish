@@ -1,22 +1,22 @@
 @echo off
 setlocal
 
-set "VER=12.8.0.0"
+set "VER=12.9.0.0"
 set "COMPANY=M&R Research Team London"
 set "DESC=chess engine"
-set "COPY=Copyright (C) 2022-2025"
+set "COPY=Copyright (C) 2022-2026"
 set "PRODUCT=Vafra Cfish clone"
 set "ICON=cfish.ico"
 
 rem Clear read-only and MOTW just in case
-attrib -R cfish_v12.8_*.exe >nul 2>&1
-powershell -NoProfile -Command "Get-Item cfish_v12.8_*_windows.exe -ErrorAction SilentlyContinue | Unblock-File" >nul 2>&1
+attrib -R cfish_v12.9_*.exe >nul 2>&1
+powershell -NoProfile -Command "Get-Item cfish_v12.9_*_windows.exe -ErrorAction SilentlyContinue | Unblock-File" >nul 2>&1
 
 for %%F in (
-  cfish_v12.8_x86-64_vnni_windows.exe
-  cfish_v12.8_x86-64_avx512_windows.exe
-  cfish_v12.8_x86-64_avx2_windows.exe
-  cfish_v12.8_x86-64_sse41_windows.exe
+  cfish_v12.9_x86-64_vnni_windows.exe
+  cfish_v12.9_x86-64_avx512_windows.exe
+  cfish_v12.9_x86-64_avx2_windows.exe
+  cfish_v12.9_x86-64_sse41_windows.exe
 ) do (
   if exist "%%F" (
     echo Patching %%F

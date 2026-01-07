@@ -3,6 +3,7 @@
   Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
   Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
   Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
+  Copyright (C) 2022-2026 Robert Jurjevic
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -85,6 +86,11 @@
     - In search Step 17 Late moves reduction / extension (LMR) updated reduction adjustment if position is or has been on the PV and the node is not likely to fail low as per ChatGPT 5.
     - Fixed binomial coefficient initialization in tbprobe.
     - In search Step 7 Razoring simplified Non-PV razoring to always use non-check quiescence search for the verification as per ChatGPT 5.1.
+
+  V 12.9
+    - Used nn-309ffdbd6879.nnue NNUE aka nn-v0f000012020.nnue.
+    - Default evaluation set to pure NNUE.
+    - Fixed case-sensitive parsing of Use NNUE option which could make GUI Pure and Classical fall back to Hybrid.
 */
 
 int main(int argc, char **argv)
