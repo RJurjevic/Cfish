@@ -88,7 +88,7 @@
     - In search Step 7 Razoring simplified Non-PV razoring to always use non-check quiescence search for the verification as per ChatGPT 5.1.
 
   V 12.9
-    - Used nn-6144da86f7c4.nnue NNUE aka nn-v0f000014000.nnue.
+    - Used nn-22f0cf6a1bda.nnue NNUE aka nn-v0f000014000.nnue.
     - Default evaluation set to pure NNUE.
     - Fixed case-sensitive parsing of Use NNUE option which could make GUI Pure and Classical fall back to Hybrid.
 */
