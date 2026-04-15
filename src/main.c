@@ -91,6 +91,8 @@
     - Used nn-6b9870789e2f.nnue NNUE aka nn-v0f000014000.nnue.
     - Default evaluation set to pure NNUE.
     - Fixed case-sensitive parsing of Use NNUE option which could make GUI Pure and Classical fall back to Hybrid.
+    - In search Step 11 Internal iterative deepening used a separate orderMove for move ordering, so IID can improve move ordering without changing ttMove semantics.
+    - In search Step 7 Razoring simplified verification to always use non-check quiescence search and limited razoring to depth <= 3.
 */
 
 int main(int argc, char **argv)

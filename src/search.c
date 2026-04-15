@@ -1,6 +1,6 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
-  Copyright (C) 2004-2025 The Stockfish developers
+  Copyright (C) 2004-2026 The Stockfish developers
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -684,12 +684,12 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   Move pv[MAX_PLY+1], capturesSearched[32], quietsSearched[64];
   TTEntry *tte;
   Key posKey;
-  Move ttMove, move, excludedMove, bestMove;
+  Move ttMove, orderMove, move, excludedMove, bestMove;
   Depth extension, newDepth;
   Value bestValue, value, ttValue, eval, maxValue, probCutBeta;
   bool formerPv, givesCheck, improving, didLMR;
   bool captureOrPromotion, inCheck, doFullDepthSearch, moveCountPruning;
-  bool ttHit, ttCapture, singularQuietLMR;
+  bool ttCapture, singularQuietLMR;
   Piece movedPiece;
   int moveCount, captureCount, quietCount, bestMoveCount;
 
@@ -766,6 +766,7 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   ttValue = ss->ttHit ? value_from_tt(tte_value(tte), ss->ply, rule50_count()) : VALUE_NONE;
   ttMove =  rootNode ? pos->rootMoves->move[pos->pvIdx].pv[0]
           : ss->ttHit    ? tte_move(tte) : 0;
+  orderMove = ttMove;
   if (!excludedMove)
     ss->ttPv = PvNode || (ss->ttHit && tte_is_pv(tte));
   formerPv = ss->ttPv && !PvNode;
@@ -905,15 +906,15 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   improving = ss->staticEval > (ss-2)->staticEval;
 
   // Step 7. Razoring
-  // If eval is really low check with qsearch if it can exceed alpha, if it can't,
-  // return a fail low.
+  // If eval is really low, verify with non-check qsearch. If it still fails low,
+  // return immediately.
   if (   !PvNode
-      && depth <= 4
+      && depth <= 3
       && eval < alpha - 369 - 254 * depth * depth)
   {
     value = qsearch_NonPV_false(pos, ss, alpha - 1, depth);
     if (value < alpha)
-        return value;
+      return value;
   }
 
   // Step 8. Futility pruning: child node
@@ -1027,7 +1028,7 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   }
 
   // Step 11. Internal iterative deepening
-  if (   !ttMove
+  if (   !orderMove
       && depth >= 6
       && (PvNode || ss->staticEval + 256 >= beta)
      )
@@ -1038,8 +1039,10 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
     else
       search_NonPV(pos, ss, alpha, d, cutNode);
 
-    tte = tt_probe(posKey, &ttHit);
-    ttMove = ttHit ? tte_move(tte) : 0;
+    bool iidHit;
+    TTEntry *iidTte = tt_probe(posKey, &iidHit);
+    if (iidHit && tte_move(iidTte))
+      orderMove = tte_move(iidTte);
   }
 
 moves_loop: // When in check search starts from here
@@ -1065,7 +1068,7 @@ moves_loop: // When in check search starts from here
   PieceToHistory *fmh2 = (ss-4)->history;
   PieceToHistory *fmh3 = (ss-6)->history;
 
-  mp_init(pos, ttMove, depth, ss->ply);
+  mp_init(pos, orderMove, depth, ss->ply);
 
   value = bestValue;
   singularQuietLMR = moveCountPruning = false;
@@ -1288,7 +1291,7 @@ moves_loop: // When in check search starts from here
         if (!likelyFailLow) {
           int pvProtect = 1;
           if (depth >= 12)           pvProtect++;
-          if (improving && depth>=8) pvProtect++;
+          if (improving && depth >= 8) pvProtect++;
           if (!quietLike)            pvProtect = 1;
           if (!earlyCandidate)       pvProtect = 1;
           if (pvProtect > 2)         pvProtect = 2;
