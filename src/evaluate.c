@@ -874,6 +874,9 @@ static Value fix_FRC(const Position *pos)
 
 #endif
 
+#define pure_NNUE() \
+  (nnue_evaluate(pos))
+
 Value evaluate(const Position *pos)
 {
   Value v;
@@ -901,7 +904,7 @@ Value evaluate(const Position *pos)
       v = adjusted_NNUE();
 
   } else if (useNNUE == EVAL_PURE)
-    v = adjusted_NNUE();
+    v = pure_NNUE();
   else
     v = evaluate_classical(pos);
 
