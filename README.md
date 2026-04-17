@@ -28,7 +28,7 @@ Further options:
 The `sparse` option selects between two different NNUE implementations.
 The option `sparse=yes` is likely superior (i.e. higher nps) for ARM-based CPUs, for Intel CPUs that do not support AVX2, and for AMD CPUs before Zen 3 (i.e. Ryzen 5000).
 
-Add `numa=no` if compilation fails with`numa.h: No such file or directory` or `cannot find -lnuma`.
+Add `numa=no` if compilation fails with `numa.h: No such file or directory` or `cannot find -lnuma`.
 
 The optimization options currently enabled with `extra=yes` appear to be less effective now that the NNUE code has been added.
 
@@ -99,15 +99,17 @@ This option only appears on NUMA machines, i.e. machines with two or more CPUs. 
 3. Install the MinGW 64-bit toolchain by entering `pacman -S mingw-w64-x86_64-toolchain`.
 4. Close the MSYS2 MinGW 64-bit terminal and open another.
 
+Windows build note: this build uses [`rcedit`](https://github.com/electron/rcedit) for Windows executable resource editing.
+
 ## Vafra Cfish
 
-Vafra Cfish, maintained by Robert Jurjevic since Cfish 12, takes its name from the Latin word *vafra*, meaning "crafty," as a nod to Robert’s earlier work on a Crafty clone, created by **Professor Robert Hyatt**.
+Vafra Cfish, maintained by Robert Jurjevic since Cfish 12, takes its name from the Latin word *vafra*, meaning "crafty," as a nod to Robert’s earlier work on a Crafty clone created by **Professor Robert Hyatt**.
 
-Vafra Cfish uses the flipped, not rotated, **HalfKP 256x2-32-32-1 NNUE architecture**. Robert trains the NNUE exclusively on Leela data, employing a combination of tools for data conversion. He uses a C# suite he developed to filter out FRC positions from the Leela dataset, as Vafra is specifically tuned for standard chess rather than FRC. Additionally, some FRC positions output by Leela’s *rescorer* tool use a non-standard format that, when converted, can cause Nodchip’s trainer to crash. To address this, Robert’s pipeline ensures that such positions are excluded. He also utilizes the tools version of Stockfish, which can read textual FEN format output from Leela’s *rescorer* and convert it into Stockfish’s binary FEN format. 
+Vafra Cfish uses the flipped, not rotated, **HalfKP 256x2-32-32-1 NNUE architecture**. Robert trains the NNUE exclusively on Leela data, using a combination of tools for data conversion and filtering. He uses a C# suite he developed to remove FRC positions from the Leela dataset, as Vafra is specifically tuned for standard chess rather than FRC. In addition, some FRC positions output by Leela’s *rescorer* tool use a non-standard format that can cause Nodchip’s trainer to crash after conversion. Robert’s pipeline therefore excludes such positions. He also uses the tools version of Stockfish, which can read the textual FEN output from Leela’s *rescorer* and convert it into Stockfish’s binary FEN format.
 
-The training itself is conducted using Robert’s **ever-so-slightly modified version of Nodchip’s trainer**, allowing him to fine-tune the process and adapt the training schedule and parameters for optimal results. This automated and customized pipeline ensures efficient and robust preparation and training of NNUE nets from scratch.  
+Training is carried out using Robert’s **ever-so-slightly modified version of Nodchip’s trainer**, allowing him to fine-tune the process and adapt the training schedule and parameters as needed. This automated and customized pipeline provides efficient and robust preparation and training of NNUE nets from scratch.
 
-Robert thanks the **Stockfish team** for creating Stockfish and for the opportunity to briefly be an informal member of the team, where he learned more about the process. He also extends his gratitude to the **Leela team** for publicly providing their data and the *rescorer* program, as well as to **Ronald de Man** for creating Cfish.
+Robert thanks the **Stockfish team** for creating Stockfish and for the opportunity to briefly be an informal member of the team, where he learned more about the development process. He also thanks the **Leela team** for publicly providing their data and the *rescorer* program, as well as **Ronald de Man** for creating Cfish.
 
 ![Vafra Logo](https://github.com/RJurjevic/Cfish/blob/master/vafra-logo.jpg?raw=true)
 
