@@ -88,7 +88,7 @@
     - In search Step 7 Razoring simplified Non-PV razoring to always use non-check quiescence search for the verification as per ChatGPT 5.1.
 
   V 12.9
-    - Used nn-e0395ede6a9f.nnue NNUE aka nn-v0f000015000.nnue.
+    - Used nn-a7ac6120c729.nnue NNUE aka nn-v0f000015000.nnue.
     - Default evaluation set to pure NNUE.
     - Fixed case-sensitive parsing of Use NNUE option which could make GUI Pure and Classical fall back to Hybrid.
     - In search Step 11 Internal iterative deepening used a separate orderMove for move ordering, so IID can improve move ordering without changing ttMove semantics.
