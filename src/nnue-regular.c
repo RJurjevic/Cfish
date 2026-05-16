@@ -6,19 +6,25 @@
 // Hidden1Layer = ClippedReLu<AffineTransform<InputLayer, 32>>
 // 512 x clipped_t -> 32 x int32_t -> 32 x clipped_t
 
-// Hidden2Layer = ClippedReLu<AffineTransform<hidden1, 32>>
-// 32 x clipped_t -> 32 x int32_t -> 32 x clipped_t
-
-// OutputLayer = AffineTransform<HiddenLayer2, 1>
-// 32 x clipped_t -> 1 x int32_t
+// BucketedTail[4x(32->32->1)]
+// For each bucket:
+//   Hidden2Layer = ClippedReLu<AffineTransform<Hidden1Layer, 32>>
+//   32 x clipped_t -> 32 x int32_t -> 32 x clipped_t
+//
+//   OutputLayer = AffineTransform<Hidden2Layer, 1>
+//   32 x clipped_t -> 1 x int32_t
+//
+// Current evaluator step:
+//   all 4 bucket tails are loaded/stored,
+//   bucket 0 is still used for evaluation.
 
 static alignas(64) weight_t hidden1_weights[32 * 512];
-static alignas(64) weight_t hidden2_weights[32 * 32];
-static alignas(64) weight_t output_weights [1 * 32];
+static alignas(64) weight_t hidden2_weights[kNnueBuckets][32 * 32];
+static alignas(64) weight_t output_weights [kNnueBuckets][1 * 32];
 
 static alignas(64) int32_t hidden1_biases[32];
-static alignas(64) int32_t hidden2_biases[32];
-static int32_t output_biases[1];
+static alignas(64) int32_t hidden2_biases[kNnueBuckets][32];
+static int32_t output_biases[kNnueBuckets][1];
 
 INLINE void affine_propagate(clipped_t *input, int32_t *output,
     unsigned inDims, unsigned outDims, int32_t *biases, weight_t *weights)
@@ -559,11 +565,14 @@ Value nnue_evaluate(const Position *pos)
       hidden1_biases, hidden1_weights);
   clip_propagate(B(hidden1_values), B(hidden1_clipped), 32);
 
+  const unsigned bucket = 0;
+
   affine_propagate(B(hidden1_clipped), B(hidden2_values), 32, 32,
-      hidden2_biases, hidden2_weights);
+      hidden2_biases[bucket], hidden2_weights[bucket]);
   clip_propagate(B(hidden2_values), B(hidden2_clipped), 32);
 
-  out_value = output_layer(B(hidden2_clipped), output_biases, output_weights);
+  out_value = output_layer(B(hidden2_clipped),
+      output_biases[bucket], output_weights[bucket]);
 
 #if defined(USE_MMX)
   _mm_empty();

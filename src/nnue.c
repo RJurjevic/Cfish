@@ -575,21 +575,37 @@ static void init_weights(const void *evalData)
   for (unsigned i = 0; i < 32; i++, d += 4)
     hidden1_biases[i] = readu_le_u32(d);
   d = read_hidden_weights(hidden1_weights, 512, d);
-  const unsigned bucket = 0;
+
   const char *tail = d;
-  const char *hidden2Biases = tail + bucket * 32 * 4;
-  const char *hidden2Weights = tail + kNnueBuckets * 32 * 4 + bucket * 32 * 32;
-  const char *outputBiases = tail + kNnueBuckets * 32 * 4 + kNnueBuckets * 32 * 32 + bucket * 1 * 4;
-  const char *outputWeights = tail + kNnueBuckets * 32 * 4 + kNnueBuckets * 32 * 32 + kNnueBuckets * 1 * 4 + bucket * 1 * 32;
-  for (unsigned i = 0; i < 32; i++, hidden2Biases += 4)
-    hidden2_biases[i] = readu_le_u32(hidden2Biases);
-  read_hidden_weights(hidden2_weights, 32, hidden2Weights);
-  output_biases[0] = readu_le_u32(outputBiases);
-  read_output_weights(output_weights, outputWeights);
+
+  const char *hidden2Biases = tail;
+  const char *hidden2Weights =
+      hidden2Biases + kNnueBuckets * 32 * 4;
+  const char *outputBiases =
+      hidden2Weights + kNnueBuckets * 32 * 32;
+  const char *outputWeights =
+      outputBiases + kNnueBuckets * 1 * 4;
+
+  for (unsigned bucket = 0; bucket < kNnueBuckets; bucket++) {
+
+    const char *hb = hidden2Biases + bucket * 32 * 4;
+    for (unsigned i = 0; i < 32; i++, hb += 4)
+      hidden2_biases[bucket][i] = readu_le_u32(hb);
+
+    read_hidden_weights(hidden2_weights[bucket], 32,
+        hidden2Weights + bucket * 32 * 32);
+
+    output_biases[bucket][0] =
+        readu_le_u32(outputBiases + bucket * 1 * 4);
+
+    read_output_weights(output_weights[bucket],
+        outputWeights + bucket * 1 * 32);
+  }
 
 #if defined(NNUE_SPARSE) && defined(USE_AVX2)
   permute_biases(hidden1_biases);
-  permute_biases(hidden2_biases);
+  for (unsigned bucket = 0; bucket < kNnueBuckets; bucket++)
+    permute_biases(hidden2_biases[bucket]);
 #endif
 }
 
