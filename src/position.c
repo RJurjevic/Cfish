@@ -197,6 +197,7 @@ void zob_init(void) {
             count++;
           }
     }
+  (void)count;
   assert(count == 3668);
 }
 
