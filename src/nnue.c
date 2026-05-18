@@ -533,6 +533,55 @@ enum {
       + 2 * kHalfDimensions * FtInDims
 };
 
+INLINE unsigned nnue_bucket_from_counts(
+    int wq, int wr, int wb, int wn, int wp,
+    int bq, int br, int bb, int bn, int bp)
+{
+  const int phase =
+      4 * (wq + bq)
+    + 2 * (wr + br)
+    +     (wb + bb)
+    +     (wn + bn);
+
+  const int white_material =
+      9 * wq + 5 * wr + 3 * (wb + wn) + wp;
+
+  const int black_material =
+      9 * bq + 5 * br + 3 * (bb + bn) + bp;
+
+  const int material_imbalance =
+      white_material >= black_material
+          ? white_material - black_material
+          : black_material - white_material;
+
+  if (phase <= 10)
+    return 3; // reduced-material / endgame-like
+
+  if (material_imbalance >= 3)
+    return 2; // materially imbalanced non-endgame
+
+  if (phase >= 18)
+    return 0; // balanced high-material non-endgame
+
+  return 1;   // balanced reduced-material non-endgame
+}
+
+INLINE unsigned nnue_bucket(const Position *pos)
+{
+  return nnue_bucket_from_counts(
+      piece_count(WHITE, QUEEN),
+      piece_count(WHITE, ROOK),
+      piece_count(WHITE, BISHOP),
+      piece_count(WHITE, KNIGHT),
+      piece_count(WHITE, PAWN),
+
+      piece_count(BLACK, QUEEN),
+      piece_count(BLACK, ROOK),
+      piece_count(BLACK, BISHOP),
+      piece_count(BLACK, KNIGHT),
+      piece_count(BLACK, PAWN));
+}
+
 #include "nnue-regular.c"
 #include "nnue-sparse.c"
 

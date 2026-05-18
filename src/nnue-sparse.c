@@ -29,7 +29,7 @@ typedef uint32_t mask2_t;
 //
 // Current evaluator step:
 //   all 4 bucket tails are loaded/stored,
-//   bucket 0 is still used for evaluation.
+//   evaluation uses the bucket selected from the current Position.
 
 #if !defined(USE_AVX512)
 static alignas(64) weight_t hidden1_weights[32 * 512];
@@ -527,7 +527,7 @@ Value nnue_evaluate(const Position *pos)
   hidden_layer(B(input), B(hidden1_out), 512, hidden1_biases,
       hidden1_weights, hidden1_mask, hidden2_mask, true);
 
-  const unsigned bucket = 0;
+  const unsigned bucket = nnue_bucket(pos);
 
   hidden_layer(B(hidden1_out), B(hidden2_out), 32,
       hidden2_biases[bucket], hidden2_weights[bucket],

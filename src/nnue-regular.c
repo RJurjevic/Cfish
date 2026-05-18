@@ -16,7 +16,7 @@
 //
 // Current evaluator step:
 //   all 4 bucket tails are loaded/stored,
-//   bucket 0 is still used for evaluation.
+//   evaluation uses the bucket selected from the current Position.
 
 static alignas(64) weight_t hidden1_weights[32 * 512];
 static alignas(64) weight_t hidden2_weights[kNnueBuckets][32 * 32];
@@ -565,7 +565,7 @@ Value nnue_evaluate(const Position *pos)
       hidden1_biases, hidden1_weights);
   clip_propagate(B(hidden1_values), B(hidden1_clipped), 32);
 
-  const unsigned bucket = 0;
+  const unsigned bucket = nnue_bucket(pos);
 
   affine_propagate(B(hidden1_clipped), B(hidden2_values), 32, 32,
       hidden2_biases[bucket], hidden2_weights[bucket]);

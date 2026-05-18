@@ -89,7 +89,8 @@
 
   V 15.0
     - Began support for flipped HalfKP 256x2-32-(32-1)x4 bucketed-tail NNUE architecture.
-    - Initial bucketed-tail evaluator path loads the new net layout and evaluates bucket 0 only.
+    - Added loading and storage for all four bucketed NNUE tails.
+    - Added position-based NNUE bucket selection matching the modified Nodchip trainer rule.
     - Used nn-affe7713ece6.nnue NNUE aka nn-v0f000020000.nnue as the initial bucketed-tail smoke-test net.
     - Default evaluation set to pure NNUE.
     - Fixed case-sensitive parsing of Use NNUE option which could make GUI Pure and Classical fall back to Hybrid.
