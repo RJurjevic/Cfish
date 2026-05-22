@@ -91,7 +91,7 @@
     - Began support for flipped HalfKP 256x2-32-(32-1)x4 bucketed-tail NNUE architecture.
     - Added loading and storage for all four bucketed NNUE tails.
     - Added position-based NNUE bucket selection matching the modified Nodchip trainer rule.
-    - Used nn-6e3a0b4da7f6.nnue NNUE aka nn-v0f000020000.nnue as the bootstrap bridge net, trained with identical bucket tails for Cfish bucket-routing
+    - Used nn-8cb352941fda.nnue NNUE aka nn-v0f000020000.nnue as the bootstrap bridge net, trained with identical bucket tails for Cfish bucket-routing
     - Default evaluation set to pure NNUE.
     - Fixed case-sensitive parsing of Use NNUE option which could make GUI Pure and Classical fall back to Hybrid.
     - In search Step 11 Internal iterative deepening used a separate orderMove for move ordering, so IID can improve move ordering without changing ttMove semantics.
