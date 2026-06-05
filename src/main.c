@@ -89,7 +89,7 @@
 
   V 15.0
     - Moved NNUE support to the flipped HalfKP 256x2-32-(32-1)x4 bucketed-tail architecture with four loaded tails and position-based bucket selection.
-    - Used nn-9c0bcf476a2a.nnue NNUE aka nn-v0f000020000.nnue as the 16.83B selected-bucket intermediate test net trained with the May 13 trainer.
+    - Used nn-c77fc1364fbf.nnue NNUE aka nn-v0f000020000.nnue as the 16.83B selected-bucket intermediate test net trained with the May 13 trainer.
     - Default evaluation set to pure NNUE.
     - Fixed case-sensitive parsing of Use NNUE option which could make GUI Pure and Classical fall back to Hybrid.
     - In search Step 11 Internal iterative deepening used a separate orderMove for move ordering, so IID can improve move ordering without changing ttMove semantics.
