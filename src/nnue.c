@@ -84,6 +84,7 @@ enum {
 enum {
   kHalfDimensions = 256,
   FtInDims = 64 * PS_END, // 64 * 641
+  kNnueBuckets = 4
 };
 
 // USE_MMX generates _mm_empty() instructions, so undefine if not needed
@@ -522,9 +523,64 @@ INLINE unsigned bit_shuffle(unsigned v, int left, int right, unsigned mask)
 #endif
 
 enum {
-  TransformerStart = 3 * 4 + 177,
-  NetworkStart = TransformerStart + 4 + 2 * 256 + 2 * 256 * 64 * 641
+  NnueArchitectureStringSize = 140,
+  NnueFileSize = 21026224,
+
+  TransformerStart = 3 * 4 + NnueArchitectureStringSize,
+  NetworkStart = TransformerStart
+      + 4
+      + 2 * kHalfDimensions
+      + 2 * kHalfDimensions * FtInDims
 };
+
+INLINE unsigned nnue_bucket_from_counts(
+    int wq, int wr, int wb, int wn, int wp,
+    int bq, int br, int bb, int bn, int bp)
+{
+  const int phase =
+      4 * (wq + bq)
+    + 2 * (wr + br)
+    +     (wb + bb)
+    +     (wn + bn);
+
+  const int white_material =
+      9 * wq + 5 * wr + 3 * (wb + wn) + wp;
+
+  const int black_material =
+      9 * bq + 5 * br + 3 * (bb + bn) + bp;
+
+  const int material_imbalance =
+      white_material >= black_material
+          ? white_material - black_material
+          : black_material - white_material;
+
+  if (phase <= 10)
+    return 3; // reduced-material / endgame-like
+
+  if (material_imbalance >= 3)
+    return 2; // materially imbalanced non-endgame
+
+  if (phase >= 18)
+    return 0; // balanced high-material non-endgame
+
+  return 1;   // balanced reduced-material non-endgame
+}
+
+INLINE unsigned nnue_bucket(const Position *pos)
+{
+  return nnue_bucket_from_counts(
+      piece_count(WHITE, QUEEN),
+      piece_count(WHITE, ROOK),
+      piece_count(WHITE, BISHOP),
+      piece_count(WHITE, KNIGHT),
+      piece_count(WHITE, PAWN),
+
+      piece_count(BLACK, QUEEN),
+      piece_count(BLACK, ROOK),
+      piece_count(BLACK, BISHOP),
+      piece_count(BLACK, KNIGHT),
+      piece_count(BLACK, PAWN));
+}
 
 #include "nnue-regular.c"
 #include "nnue-sparse.c"
@@ -568,16 +624,37 @@ static void init_weights(const void *evalData)
   for (unsigned i = 0; i < 32; i++, d += 4)
     hidden1_biases[i] = readu_le_u32(d);
   d = read_hidden_weights(hidden1_weights, 512, d);
-  for (unsigned i = 0; i < 32; i++, d += 4)
-    hidden2_biases[i] = readu_le_u32(d);
-  d = read_hidden_weights(hidden2_weights, 32, d);
-  for (unsigned i = 0; i < 1; i++, d += 4)
-    output_biases[i] = readu_le_u32(d);
-  read_output_weights(output_weights, d);
+
+  const char *tail = d;
+
+  const char *hidden2Biases = tail;
+  const char *hidden2Weights =
+      hidden2Biases + kNnueBuckets * 32 * 4;
+  const char *outputBiases =
+      hidden2Weights + kNnueBuckets * 32 * 32;
+  const char *outputWeights =
+      outputBiases + kNnueBuckets * 1 * 4;
+
+  for (unsigned bucket = 0; bucket < kNnueBuckets; bucket++) {
+
+    const char *hb = hidden2Biases + bucket * 32 * 4;
+    for (unsigned i = 0; i < 32; i++, hb += 4)
+      hidden2_biases[bucket][i] = readu_le_u32(hb);
+
+    read_hidden_weights(hidden2_weights[bucket], 32,
+        hidden2Weights + bucket * 32 * 32);
+
+    output_biases[bucket][0] =
+        readu_le_u32(outputBiases + bucket * 1 * 4);
+
+    read_output_weights(output_weights[bucket],
+        outputWeights + bucket * 1 * 32);
+  }
 
 #if defined(NNUE_SPARSE) && defined(USE_AVX2)
   permute_biases(hidden1_biases);
-  permute_biases(hidden2_biases);
+  for (unsigned bucket = 0; bucket < kNnueBuckets; bucket++)
+    permute_biases(hidden2_biases[bucket]);
 #endif
 }
 
@@ -595,14 +672,14 @@ void nnue_export_net(void) {
 
 static bool verify_net(const void *evalData, size_t size)
 {
-  if (size != 21022697) return false;
+  if (size != NnueFileSize) return false;
 
-  const char *d = evalData;
+  const char *d = (const char *)evalData;
   if (readu_le_u32(d) != NnueVersion) return false;
-  if (readu_le_u32(d + 4) != 0x3e5aa6eeU) return false;
-  if (readu_le_u32(d + 8) != 177) return false;
-  if (readu_le_u32(d + TransformerStart) != 0x5d69d7b8) return false;
-  if (readu_le_u32(d + NetworkStart) != 0x63337156) return false;
+  if (readu_le_u32(d + 4) != 0x2f93745fU) return false;
+  if (readu_le_u32(d + 8) != NnueArchitectureStringSize) return false;
+  if (readu_le_u32(d + TransformerStart) != 0x5d69d7b8U) return false;
+  if (readu_le_u32(d + NetworkStart) != 0x72faa3e7U) return false;
 
   return true;
 }
@@ -667,8 +744,8 @@ void nnue_init(void)
          , evalFile
 #else
          "info string ERROR: The default net can be downloaded from:\n"
-         "info string ERROR: https://tests.stockfishchess.org/api/nn/%s\n"
-         "info string ERROR: The network must be of flipped HalfKP 256x2-32-32-1 architecture.",
+         "info string ERROR: https://www.jurjevic.org.uk/chess/vafra/ftp/net/%s\n"
+         "info string ERROR: The network must be of flipped HalfKP 256x2-32-(32-1)x4 architecture.",
          evalFile, option_default_string_value(OPT_EVAL_FILE)
 #endif
          );

@@ -87,8 +87,9 @@
     - Fixed binomial coefficient initialization in tbprobe.
     - In search Step 7 Razoring simplified Non-PV razoring to always use non-check quiescence search for the verification as per ChatGPT 5.1.
 
-  V 12.9
-    - Used nn-a7ac6120c729.nnue NNUE aka nn-v0f000015000.nnue.
+  V 15.0
+    - Moved NNUE support to the flipped HalfKP 256x2-32-(32-1)x4 bucketed-tail architecture with four loaded tails and position-based bucket selection.
+    - Used nn-17775d0f6f54.nnue NNUE aka nn-v0f000020000.nnue as the epoch 33420 / 33.42B selected-bucket candidate net trained with the May 13 trainer.
     - Default evaluation set to pure NNUE.
     - Fixed case-sensitive parsing of Use NNUE option which could make GUI Pure and Classical fall back to Hybrid.
     - In search Step 11 Internal iterative deepening used a separate orderMove for move ordering, so IID can improve move ordering without changing ttMove semantics.

@@ -19,24 +19,30 @@ typedef uint32_t mask2_t;
 // Hidden1Layer = ClippedReLu<AffineTransform<InputLayer, 32>>
 // 512 x int8_t -> 32 x int32_t -> 32 x int8_t
 
-// Hidden2Layer = ClippedReLu<AffineTransform<hidden1, 32>>
-// 32 x int8_t -> 32 x int32_t -> 32 x out_t
-
-// OutputLayer = AffineTransform<HiddenLayer2, 1>
-// 32 x out_t -> 1 x int32_t
+// BucketedTail[4x(32->32->1)]
+// For each bucket:
+//   Hidden2Layer = ClippedReLu<AffineTransform<Hidden1Layer, 32>>
+//   32 x int8_t -> 32 x int32_t -> 32 x out_t
+//
+//   OutputLayer = AffineTransform<Hidden2Layer, 1>
+//   32 x out_t -> 1 x int32_t
+//
+// Current evaluator step:
+//   all 4 bucket tails are loaded/stored,
+//   evaluation uses the bucket selected from the current Position.
 
 #if !defined(USE_AVX512)
 static alignas(64) weight_t hidden1_weights[32 * 512];
-static alignas(64) weight_t hidden2_weights[32 * 32];
+static alignas(64) weight_t hidden2_weights[kNnueBuckets][32 * 32];
 #else
 static alignas(64) weight_t hidden1_weights[64 * 512];
-static alignas(64) weight_t hidden2_weights[64 * 32];
+static alignas(64) weight_t hidden2_weights[kNnueBuckets][64 * 32];
 #endif
-static alignas(64) out_t output_weights[1 * 32];
+static alignas(64) out_t output_weights[kNnueBuckets][1 * 32];
 
 static alignas(64) int32_t hidden1_biases[32];
-static alignas(64) int32_t hidden2_biases[32];
-static int32_t output_biases[1];
+static alignas(64) int32_t hidden2_biases[kNnueBuckets][32];
+static int32_t output_biases[kNnueBuckets][1];
 
 #ifdef VECTOR
 INLINE bool next_idx(unsigned *idx, unsigned *offset, mask2_t *v,
@@ -521,10 +527,14 @@ Value nnue_evaluate(const Position *pos)
   hidden_layer(B(input), B(hidden1_out), 512, hidden1_biases,
       hidden1_weights, hidden1_mask, hidden2_mask, true);
 
-  hidden_layer(B(hidden1_out), B(hidden2_out), 32, hidden2_biases,
-      hidden2_weights, hidden2_mask, NULL, false);
+  const unsigned bucket = nnue_bucket(pos);
 
-  out_value = output_layer(B(hidden2_out), output_biases, output_weights);
+  hidden_layer(B(hidden1_out), B(hidden2_out), 32,
+      hidden2_biases[bucket], hidden2_weights[bucket],
+      hidden2_mask, NULL, false);
+
+  out_value = output_layer(B(hidden2_out),
+      output_biases[bucket], output_weights[bucket]);
 
 #if defined(USE_MMX)
   _mm_empty();
