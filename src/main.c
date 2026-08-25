@@ -95,6 +95,9 @@
     - In search Step 11 Internal iterative deepening used a separate orderMove for move ordering, so IID can improve move ordering without changing ttMove semantics.
     - In search Step 7 Razoring simplified verification to always use non-check quiescence search and limited razoring to depth <= 3.
     - Simplified pure NNUE evaluation to use raw NNUE output directly.
+
+  V 15.1
+    - Used nn-4ce87a818950.nnue NNUE aka nn-v0f000020030.nnue as the run 20030 epoch 26680 / 26.68B trend-supported selected-bucket candidate net trained with the June 9 trainer using quiescence_threshold 300.
 */
 
 int main(int argc, char **argv)
