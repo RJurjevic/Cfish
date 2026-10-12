@@ -97,7 +97,7 @@
     - Simplified pure NNUE evaluation to use raw NNUE output directly.
 
   V 15.1
-    - Used nn-d75d5382b5db.nnue NNUE aka nn-v0f000020050.nnue as the run 20050 epoch 23040 / 23.04B trend-supported selected-bucket candidate net trained with the June 9 trainer using quiescence_threshold 270.
+    - Used nn-0887f9264d0e.nnue NNUE aka nn-v0f000020050.nnue as the run 20050 epoch 26190 / 26.19B trend-supported selected-bucket candidate net trained with the June 9 trainer using quiescence_threshold 270.
 */
 
 int main(int argc, char **argv)
