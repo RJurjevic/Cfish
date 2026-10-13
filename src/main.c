@@ -97,7 +97,7 @@
     - Simplified pure NNUE evaluation to use raw NNUE output directly.
 
   V 15.1
-    - Used nn-0887f9264d0e.nnue NNUE aka nn-v0f000020050.nnue as the run 20050 epoch 26190 / 26.19B trend-supported selected-bucket candidate net trained with the June 9 trainer using quiescence_threshold 270.
+    - Used nn-7e743114519a.nnue NNUE aka nn-v0f000020050.nnue as the run 20050 epoch 27330 / 27.33B trend-supported selected-bucket candidate net trained with the June 9 trainer using quiescence_threshold 270.
     - In search Step 7 Razoring made razoring more conservative by limiting it to depth <= 2, using depth-zero quiescence verification, and adding check and mate/tablebase score safeguards.
 */
 

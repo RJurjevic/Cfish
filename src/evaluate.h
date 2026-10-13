@@ -4,7 +4,7 @@
 #include "types.h"
 
 // Default NNUE network file the engine tries to load at startup if no UCI
-#define DefaultEvalFile "nn-0887f9264d0e.nnue"
+#define DefaultEvalFile "nn-7e743114519a.nnue"
 
 enum { Tempo = 28 };
 
