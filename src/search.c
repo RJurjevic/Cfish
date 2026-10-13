@@ -905,15 +905,19 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   // the improving flag is used in various pruning heuristics
   improving = ss->staticEval > (ss-2)->staticEval;
 
-  // Step 7. Razoring
-  // If eval is really low, verify with non-check qsearch. If it still fails low,
-  // return immediately.
+  // Step 7. Conservative razoring
+  // If static evaluation is far below alpha, verify with quiescence.
+  // Avoid razoring near decisive scores.
   if (   !PvNode
-      && depth <= 3
+      && !inCheck
+      && depth <= 2
+      && abs(alpha) < VALUE_TB_WIN_IN_MAX_PLY
       && eval < alpha - 369 - 254 * depth * depth)
   {
-    value = qsearch_NonPV_false(pos, ss, alpha - 1, depth);
-    if (value < alpha)
+    value = qsearch_NonPV_false(pos, ss, alpha - 1, 0);
+
+    if (   value < alpha
+        && abs(value) < VALUE_TB_WIN_IN_MAX_PLY)
       return value;
   }
 
