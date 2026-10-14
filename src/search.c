@@ -766,6 +766,7 @@ INLINE Value search_node(Position *pos, Stack *ss, Value alpha, Value beta,
   ttValue = ss->ttHit ? value_from_tt(tte_value(tte), ss->ply, rule50_count()) : VALUE_NONE;
   ttMove =  rootNode ? pos->rootMoves->move[pos->pvIdx].pv[0]
           : ss->ttHit    ? tte_move(tte) : 0;
+  Depth ttDepth = ss->ttHit ? tte_depth(tte) : DEPTH_NONE;
   orderMove = ttMove;
   if (!excludedMove)
     ss->ttPv = PvNode || (ss->ttHit && tte_is_pv(tte));
@@ -1342,6 +1343,16 @@ moves_loop: // When in check search starts from here
 
       value = -search_NonPV(pos, ss+1, -(alpha+1), d, true);
 
+      // Stockfish-inspired adaptive LMR re-search depth.
+      // Extend unexpectedly good moves and shorten marginal ones.
+      if (value > alpha) {
+        bool doDeeperSearch =
+            d < newDepth && value > bestValue + 53;
+        bool doShallowerSearch =
+            value < bestValue + 8;
+        newDepth += (int)doDeeperSearch - (int)doShallowerSearch;
+      }
+
       doFullDepthSearch = value > alpha && d < newDepth;
       didLMR = true;
     } else {
@@ -1367,6 +1378,18 @@ moves_loop: // When in check search starts from here
     if (   PvNode
         && (moveCount == 1 || (value > alpha && (rootNode || value < beta))))
     {
+      // Stockfish-inspired PV frontier extension:
+      // Search at least one main-search ply when TT evidence
+      // supports the move, rather than immediately entering qsearch.
+      if (   !rootNode
+          && move == ttMove
+          && (   (ttValue != VALUE_NONE
+                  && (ttValue >= VALUE_TB_WIN_IN_MAX_PLY
+                      || ttValue <= VALUE_TB_LOSS_IN_MAX_PLY)
+                  && ttDepth > 0)
+              || ttDepth > 1))
+        newDepth = max(newDepth, 1);
+
       (ss+1)->pv = pv;
       (ss+1)->pv[0] = 0;
 
