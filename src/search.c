@@ -1343,24 +1343,25 @@ moves_loop: // When in check search starts from here
 
       value = -search_NonPV(pos, ss+1, -(alpha+1), d, true);
 
-      // Stockfish-inspired adaptive LMR re-search depth.
-      // Extend unexpectedly good moves and shorten marginal ones.
-      if (value > alpha) {
-        bool doDeeperSearch =
-            d < newDepth && value > bestValue + 53;
-        bool doShallowerSearch =
-            value < bestValue + 8;
-        newDepth += (int)doDeeperSearch - (int)doShallowerSearch;
-      }
-
       doFullDepthSearch = value > alpha && d < newDepth;
       didLMR = true;
+
+      // Stockfish-inspired adaptive LMR re-search depth.
+      // Adjust verification depth based on the reduced search score,
+      // keeping it deeper than the reduced search. The adjusted depth
+      // may also be used by a subsequent PV re-search.
+      if (doFullDepthSearch) {
+        bool doDeeperSearch = value > bestValue + 53;
+        bool doShallowerSearch = value < bestValue + 8;
+        newDepth += (int)doDeeperSearch - (int)doShallowerSearch;
+        newDepth = max(newDepth, d + 1);
+      }
     } else {
       doFullDepthSearch = !PvNode || moveCount > 1;
       didLMR = false;
     }
 
-    // Step 18. Full depth search when LMR is skipped or fails high.
+    // Step 18. Normal zero-window search or adaptive LMR verification.
     if (doFullDepthSearch) {
       value = -search_NonPV(pos, ss+1, -(alpha+1), newDepth, !cutNode);
 
@@ -1372,6 +1373,7 @@ moves_loop: // When in check search starts from here
       }
     }
 
+    // Step 19. Full-window PV search
     // For PV nodes only, do a full PV search on the first move or after a fail
     // high (in the latter case search only if value < beta), otherwise let the
     // parent node fail low with value <= alpha and try another move.
@@ -1396,14 +1398,14 @@ moves_loop: // When in check search starts from here
       value = -search_PV(pos, ss+1, -beta, -alpha, min(maxNextDepth, newDepth));
     }
 
-    // Step 19. Undo move
+    // Step 20. Undo move
     // HACK: Fix bench after introduction of 2-fold MultiPV bug
     if (rootNode) pos->st[-1].key ^= pos->rootKeyFlip;
     undo_move(pos, move);
 
     assert(value > -VALUE_INFINITE && value < VALUE_INFINITE);
 
-    // Step 20. Check for a new best move
+    // Step 21. Check for a new best move
     // Finished searching the move. If a stop occurred, the return value of
     // the search cannot be trusted, and we return immediately without
     // updating best move, PV and TT.
@@ -1479,7 +1481,7 @@ moves_loop: // When in check search starts from here
     return VALUE_DRAW;
   */
 
-  // Step 21. Check for mate and stalemate
+  // Step 22. Check for mate and stalemate
   // All legal moves have been searched and if there are no legal moves,
   // it must be a mate or a stalemate. If we are in a singular extension
   // search then return a fail low score.

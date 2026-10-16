@@ -99,7 +99,7 @@
   V 15.1
     - Used nn-074f1eb0e582.nnue NNUE aka nn-v0f000020050.nnue as the run 20050 epoch 31820 / 31.82B trend-supported selected-bucket candidate net trained with the June 9 trainer using quiescence_threshold 270.
     - In search Step 7 Razoring made razoring more conservative by limiting it to depth <= 2, using depth-zero quiescence verification, and adding check and mate/tablebase score safeguards.
-    - In search Step 17 Late moves reduction / extension (LMR) introduced Stockfish-inspired score-dependent re-search depth adjustment, extending unexpectedly strong moves and shortening marginal ones.
+    - In search Step 17 Late moves reduction / extension (LMR) introduced Stockfish-inspired score-dependent verification depth adjustment, extending strong moves or shortening marginal ones while preserving the verification decision and ensuring that verification remains deeper than the reduced search.
     - In search PV re-search introduced Stockfish-inspired transposition-table-supported frontier extension to ensure at least one ply of full search when TT evidence supports the move.
 */
 
