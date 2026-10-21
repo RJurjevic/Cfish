@@ -117,6 +117,14 @@ Training is carried out using Robert’s modified version of Nodchip’s trainer
 
 Robert thanks the **Stockfish team** for creating Stockfish and for the opportunity to briefly be an informal member of the team, where he learned more about the development process. He also thanks the **Leela team** for publicly providing their data and the *rescorer* program, as well as **Ronald de Man** for creating Cfish.
 
-![Vafra Logo](https://github.com/RJurjevic/Cfish/blob/master/vafra-logo.jpg?raw=true)
+---
+
+<p align="center">
+  <img src="vafra-logo0.jpg" alt="Vafra Cfish" width="900">
+</p>
+
+<p align="center">
+  <em>Vafra Cfish — independent chess-engine and NNUE research.</em>
+</p>
 
 
